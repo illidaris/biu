@@ -35,6 +35,9 @@ func (a *Analyzer) Visit(node ast.Node) ast.Visitor {
 			fields := make([]*BiuField, 0)
 			for _, f := range structType.Fields.List {
 				bField := &BiuField{}
+				if f.Names == nil {
+					continue
+				}
 				bField.Name = f.Names[0].Name
 				bField.Nick = CasedName(bField.Name)
 				if f.Comment != nil {
