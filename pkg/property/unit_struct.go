@@ -2,5 +2,6 @@ package property
 
 type BiuStruct struct {
 	Named
-	Fields []*BiuField
+	Fields                []*BiuField
+	WithBefore, WithAfter bool
 }

@@ -1,13 +1,13 @@
+/*
+Copyright © 2022 Joseph
+
+*/
 package main
 
-import (
-	"biu/pkg/property"
-)
+import "biu/cmd"
 
 func main() {
-	err := property.Input()
-	if err != nil {
-		println(err)
-	}
-
+	println("begin...")
+	cmd.Execute()
+	println("end...")
 }

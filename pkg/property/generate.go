@@ -66,73 +66,15 @@ func (i *Generator) SetterFunc(field *BiuField) ast.Decl {
 		},
 	}
 	// body
-	body := []ast.Stmt{
-		// before
-		&ast.IfStmt{
-			Init: &ast.AssignStmt{
-				Lhs: []ast.Expr{
-					&ast.Ident{
-						Name: "err",
-					},
-				},
-				Tok: token.DEFINE,
-				Rhs: []ast.Expr{
-					&ast.CallExpr{
-						Fun: &ast.SelectorExpr{
-							X: &ast.Ident{
-								Name: "i",
-							},
-							Sel: &ast.Ident{
-								Name: "Before",
-							},
-						},
-					},
-				},
-			},
-			Cond: &ast.BinaryExpr{
-				X: &ast.Ident{
-					Name: "err",
-				},
-				Op: token.NEQ,
-				Y: &ast.Ident{
-					Name: "nil",
-				},
-			},
-			Body: &ast.BlockStmt{
-				List: []ast.Stmt{
-					&ast.ReturnStmt{
-						Results: []ast.Expr{
-							&ast.Ident{
-								Name: "err",
-							},
-						},
-					},
-				},
-			},
-		},
-		// after
-		&ast.DeferStmt{
-			Call: &ast.CallExpr{
-				Fun: &ast.SelectorExpr{
-					X:   &ast.Ident{Name: "i"},
-					Sel: &ast.Ident{Name: "After"},
-				},
-				Args: []ast.Expr{
-					&ast.BasicLit{
-						Kind:  token.STRING,
-						Value: fmt.Sprintf("\"%s\"", field.Name),
-					},
-					&ast.BasicLit{
-						Kind:  token.STRING,
-						Value: fmt.Sprintf("\"%s\"", field.Nick),
-					},
-					&ast.Ident{
-						Name: "value",
-					},
-				},
-			},
-		},
+	body := make([]ast.Stmt, 0)
+	if field.WithBefore {
+		body = append(body, BuildBeforeFunc())
+	}
+	if field.WithAfter {
+		body = append(body, BuildAfterFunc(field.Name, field.Nick))
+	}
 
+	body = append(body,
 		&ast.AssignStmt{
 			Lhs: []ast.Expr{
 				&ast.SelectorExpr{
@@ -151,8 +93,7 @@ func (i *Generator) SetterFunc(field *BiuField) ast.Decl {
 					Name: "nil",
 				},
 			},
-		},
-	}
+		})
 
 	setter := &ast.FuncDecl{
 		Recv: field.GetAstReceiver(),

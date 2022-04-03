@@ -6,8 +6,9 @@ type BiuField struct {
 	Named
 	Typed
 	Commented
-	Nick   string
-	Parent *BiuField
+	Nick                  string
+	WithBefore, WithAfter bool
+	Parent                *BiuField
 }
 
 func (f *BiuField) ToAstField(isStar bool) *ast.Field {

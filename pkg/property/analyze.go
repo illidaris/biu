@@ -36,6 +36,7 @@ func (a *Analyzer) Visit(node ast.Node) ast.Visitor {
 			for _, f := range structType.Fields.List {
 				bField := &BiuField{}
 				bField.Name = f.Names[0].Name
+				bField.Nick = CasedName(bField.Name)
 				if f.Comment != nil {
 					cs := make([]string, 0)
 					for _, c := range f.Comment.List {
@@ -58,7 +59,28 @@ func (a *Analyzer) Visit(node ast.Node) ast.Visitor {
 			biuStruct.Name = st.Name.Name
 			biuStruct.Fields = fields
 			a.stCh <- biuStruct
-			// (&Generator{}).Invoke(biuStruct)
+		}
+	case *ast.FuncDecl:
+		funcDecl := node.(*ast.FuncDecl)
+		if funcDecl.Recv != nil && funcDecl.Recv.List != nil {
+			for _, v := range funcDecl.Recv.List {
+				if v.Type != nil {
+					if sType, ok := (v.Type).(*ast.StarExpr); ok {
+						if idname, ok := sType.X.(*ast.Ident); ok {
+							bStruct := &BiuStruct{}
+							bStruct.Name = idname.Name
+							if funcDecl.Name.Name == "Before" {
+								bStruct.WithBefore = true
+								a.stCh <- bStruct
+							}
+							if funcDecl.Name.Name == "After" {
+								bStruct.WithAfter = true
+								a.stCh <- bStruct
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	return a
@@ -79,14 +101,9 @@ func FlatSelectorExpr(node *ast.SelectorExpr) string {
 	return fmt.Sprintf("%s.%s", prefix, r.Name)
 }
 
-func Input() error {
-	var (
-		packagePath string
-	)
-	packagePath = "D:\\WorkSpace\\gitee\\go_others\\property\\demo"
-
+func Input(filePath string) error {
 	fSet := token.NewFileSet()
-	pkMap, err := parser.ParseDir(fSet, packagePath, func(info fs.FileInfo) bool {
+	pkMap, err := parser.ParseDir(fSet, filePath, func(info fs.FileInfo) bool {
 		return true
 	}, parser.ParseComments)
 	if err != nil {
@@ -107,12 +124,35 @@ func Input() error {
 
 			biuFile := &BiuFile{}
 			biuFile.Name = fmt.Sprintf("%s_prop.go", fileName)
-			biuFile.Path = packagePath
+			biuFile.Path = filePath
 			biuFile.Package = p
+
+			beforeMap := make(map[string]bool)
+			afterMap := make(map[string]bool)
 
 			v := &Analyzer{}
 			for st := range v.Walk(f) {
-				biuFile.BiuStructs = append(biuFile.BiuStructs, st)
+				if len(st.Fields) > 0 {
+					biuFile.BiuStructs = append(biuFile.BiuStructs, st)
+				}
+				if st.WithBefore {
+					beforeMap[st.Name] = st.WithBefore
+				}
+				if st.WithAfter {
+					afterMap[st.Name] = st.WithAfter
+				}
+			}
+			for _, st := range biuFile.BiuStructs {
+				if v, ok := beforeMap[st.Name]; ok {
+					st.WithBefore = v
+				}
+				if v, ok := afterMap[st.Name]; ok {
+					st.WithAfter = v
+				}
+				for _, f := range st.Fields {
+					f.WithBefore = st.WithBefore
+					f.WithAfter = st.WithAfter
+				}
 			}
 			// write 2 file
 			(&Generator{}).Invoke(biuFile)
