@@ -5,7 +5,6 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"biu/pkg/property"
 	"fmt"
 	"path/filepath"
 
@@ -29,6 +28,6 @@ to quickly create a Cobra application.`,
 			return
 		}
 		fmt.Printf("[%s] will generate property \n", absPath)
-		property.Input(filePath)
+		// property.Input(filePath)
 	},
 }

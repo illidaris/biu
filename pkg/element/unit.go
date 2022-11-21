@@ -1,4 +1,4 @@
-package property
+package element
 
 import (
 	"go/ast"

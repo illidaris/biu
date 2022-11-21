@@ -5,20 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "property exec",
+            "name": "struct2doc exec",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${fileDirname}",
-            "args": ["property","-f","./"]
+            "program": "${workspaceFolder}",
+            "args": ["struct2doc","-f","./"]
         }, 
         {
-            "name": "property dev",
+            "name": "struct2doc dev",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${fileDirname}",
-            "args": ["property","-f","D:\\WorkSpace\\gitee\\go_others\\property\\demo"]
+            "program": "${workspaceFolder}",
+            "args": ["struct2doc","-f","D:\\WorkSpace\\gitee\\go_others\\project\\po"]
         }
         
     ]

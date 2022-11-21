@@ -13,6 +13,9 @@ import (
 // file path
 var filePath string
 
+// out path
+var outPath string
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "biu",
@@ -48,6 +51,7 @@ func init() {
 	// when this action is called directly.
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.PersistentFlags().StringVarP(&filePath, "filePath", "f", "./", "default is ./")
+	rootCmd.PersistentFlags().StringVarP(&outPath, "out", "o", "./out", "default is ./out")
 
 	rootCmd.AddCommand(helpCmd)
 	rootCmd.AddCommand(versionCmd)

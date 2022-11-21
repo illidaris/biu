@@ -1,4 +1,4 @@
-package property
+package element
 
 type BiuPackage struct {
 	Name     string

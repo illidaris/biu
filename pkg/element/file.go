@@ -1,4 +1,4 @@
-package property
+package element
 
 type BiuFile struct {
 	Path       string

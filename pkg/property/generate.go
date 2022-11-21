@@ -1,6 +1,7 @@
 package property
 
 import (
+	"biu/pkg/element"
 	"bytes"
 	"fmt"
 	"go/ast"
@@ -26,7 +27,7 @@ func (i *Generator) GetterNameFunc() func(string) string {
 	}
 }
 
-func (i *Generator) Invoke(file *BiuFile) error {
+func (i *Generator) Invoke(file *element.BiuFile) error {
 	wSet := token.NewFileSet()
 	wf := &ast.File{}
 
@@ -45,9 +46,9 @@ func (i *Generator) Invoke(file *BiuFile) error {
 	return nil
 }
 
-func (i *Generator) SetterFunc(field *BiuField) ast.Decl {
+func (i *Generator) SetterFunc(field *element.BiuField) ast.Decl {
 	// params
-	value := &BiuField{}
+	value := &element.BiuField{}
 	value.Name = "value"
 	value.Type = field.Type
 
@@ -57,7 +58,7 @@ func (i *Generator) SetterFunc(field *BiuField) ast.Decl {
 		},
 	}
 	// results
-	errResult := &BiuField{}
+	errResult := &element.BiuField{}
 	errResult.Type = "error"
 
 	results := &ast.FieldList{
@@ -116,9 +117,9 @@ func (i *Generator) SetterFunc(field *BiuField) ast.Decl {
 	return setter
 }
 
-func (i *Generator) GetterFunc(field *BiuField) ast.Decl {
+func (i *Generator) GetterFunc(field *element.BiuField) ast.Decl {
 	// results
-	errResult := &BiuField{}
+	errResult := &element.BiuField{}
 	errResult.Type = field.Type
 
 	results := &ast.FieldList{
