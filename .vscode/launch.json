@@ -10,16 +10,35 @@
             "request": "launch",
             "mode": "auto",
             "program": "${fileDirname}",
-            "args": ["property","-f","./"]
-        }, 
+            "args": [
+                "property",
+                "-f",
+                "./"
+            ]
+        },
         {
             "name": "property dev",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${fileDirname}",
-            "args": ["property","-f","D:\\WorkSpace\\gitee\\go_others\\property\\demo"]
+            "args": [
+                "property",
+                "-f",
+                "D:\\WorkSpace\\go_others\\property\\demo"
+            ]
+        },
+        {
+            "name": "excel2model dev",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${fileDirname}",
+            "args": [
+                "excel2model",
+                "-f",
+                "D:\\WorkSpace\\go_others\\property\\demo"
+            ]
         }
-        
     ]
 }
