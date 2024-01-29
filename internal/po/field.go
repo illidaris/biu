@@ -5,49 +5,9 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
-	"reflect"
-	"strconv"
+
 	"strings"
 )
-
-func Rows2Struct[T any](rows ...[]string) []*T {
-	var data []*T
-	// 默认第一行对应tag
-	head := rows[0]
-	for _, row := range rows[1:] {
-		stu := new(T)
-		rv := reflect.ValueOf(stu).Elem()
-		for i := 0; i < len(row); i++ {
-			colCell := row[i]
-			// 通过 tag 取到结构体字段下标
-			colCell = strings.Trim(colCell, " ")
-			// 通过字段下标找到字段放射对象
-			fName := head[i]
-			v := rv.FieldByName(fName)
-			// 根据字段的类型，选择适合的赋值方法
-			switch v.Kind() {
-			case reflect.String:
-				value := colCell
-				v.SetString(value)
-			case reflect.Int64, reflect.Int32, reflect.Int8:
-				value, _ := strconv.Atoi(colCell)
-				// if err != nil {
-				// 	panic(err)
-				// }
-				v.SetInt(int64(value))
-			case reflect.Float64:
-				value, _ := strconv.ParseFloat(colCell, 64)
-				// if err != nil {
-				// 	panic(err)
-				// }
-				v.SetFloat(value)
-			}
-		}
-
-		data = append(data, stu)
-	}
-	return data
-}
 
 type GoField struct {
 	NameSection
@@ -91,10 +51,7 @@ func (i GoField) GetJsonTag() string {
 func (i GoField) GetGormTag() string {
 	keys := []string{
 		"column:" + convert.Lcfirst(i.Name),
-		"type:" + convert.ToMysqlType(i.Type),
-	}
-	if i.Size > 0 {
-		keys = append(keys, fmt.Sprintf("size:%d", i.Size))
+		"type:" + convert.ToMysqlType(i.Type, i.Size),
 	}
 	if i.Pk != 0 {
 		keys = append(keys, "primaryKey")
@@ -118,11 +75,25 @@ func (i GoField) GetTag() *ast.BasicLit {
 	}
 }
 
-func (i GoField) ToAstField() *ast.Field {
+func (i GoField) ToPoField() *ast.Field {
 	field := &ast.Field{}
 	field.Names = i.GetAstNames()
 	field.Type = i.GetAstType()
 	field.Comment = i.GetComment()
 	field.Tag = i.GetTag()
+	return field
+}
+
+func (i GoField) ToDtoField() *ast.Field {
+	field := &ast.Field{}
+	field.Names = i.GetAstNames()
+	field.Type = i.GetAstType()
+	field.Comment = i.GetComment()
+	field.Tag = &ast.BasicLit{
+		Kind: token.STRING,
+		Value: fmt.Sprintf("`%s`", strings.Join([]string{
+			i.GetJsonTag(),
+		}, " ")),
+	}
 	return field
 }

@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"go/ast"
 	"go/format"
 	"go/token"
 	"log"
@@ -13,17 +14,34 @@ import (
 	"path"
 	"strings"
 
+	fileex "github.com/illidaris/file/path"
 	"github.com/xuri/excelize/v2"
 )
+
+func GenTemplate() {
+	f := excelize.NewFile()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	// Set value of a cell.
+	for index, val := range convert.Struct2Row(po.GoField{}) {
+		f.SetCellValue("Sheet1", fmt.Sprintf("%s1", convert.ConvertNumberToLetter(index+1)), val)
+	}
+	// Save spreadsheet by the given path.
+	if err := f.SaveAs("rename_package.xlsx"); err != nil {
+		fmt.Println(err)
+	}
+}
 
 func Invoke(filepath string) {
 	ch, _ := ReadFrmExcel(filepath)
 	for v := range ch {
-		f := v.ToAstFile()
-		if f == nil {
-			continue
-		}
-		Write2File(fmt.Sprintf("tmp/%s.go", v.GetAstName()), token.NewFileSet(), f)
+		po := v.ToPoFile()
+		Write2File("tmp", "po", v.PackageName, v.Name, po)
+		dto := v.ToDtoFile()
+		Write2File("tmp", "dto", v.PackageName, v.Name, dto)
 	}
 }
 
@@ -56,7 +74,7 @@ func ReadFrmExcel(filepath string) (<-chan *po.GoFile, error) {
 			sts := []*po.GoStruct{}
 			st := &po.GoStruct{}
 			st.Name = convert.Ucfirst(sheet) // 结构体名
-			st.Fields = po.Rows2Struct[po.GoField](rows...)
+			st.Fields = convert.Row2Struct[po.GoField](rows...)
 			sts = append(sts, st)
 			fl := &po.GoFile{}
 			fl.Name = sheet          // 文件名
@@ -68,29 +86,24 @@ func ReadFrmExcel(filepath string) (<-chan *po.GoFile, error) {
 	return ch, nil
 }
 
-func Write2File(dst string, set *token.FileSet, node interface{}) {
+func Write2File(out string, module, pkg, name string, gofile *ast.File) {
+	if gofile == nil {
+		return
+	}
+	var set = &token.FileSet{}
 	var output []byte
+	var keys = []string{
+		out,
+		module,
+		pkg,
+	}
+	_ = fileex.MkdirIfNotExist(path.Join(keys...))
 	buffer := bytes.NewBuffer(output)
-	err := format.Node(buffer, set, node)
+	err := format.Node(buffer, set, gofile)
 	if err != nil {
 		log.Fatal(err)
 	}
+	keys = append(keys, fmt.Sprintf("%s.go", name))
 	// 输出Go代码
-	os.WriteFile(dst, buffer.Bytes(), os.ModePerm)
+	os.WriteFile(path.Join(keys...), buffer.Bytes(), os.ModePerm)
 }
-
-// wSet := token.NewFileSet()
-// wf := &ast.File{}
-
-// for _, st := range file.BiuStructs {
-// 	for _, f := range st.Fields {
-// 		wf.Decls = append(wf.Decls, i.SetterFunc(f))
-// 		wf.Decls = append(wf.Decls, i.GetterFunc(f))
-// 	}
-// }
-
-// wf.Name = &ast.Ident{
-// 	Name: file.Package.Name,
-// }
-
-// Write2File(path.Join(file.Path, file.Name), wSet, wf)

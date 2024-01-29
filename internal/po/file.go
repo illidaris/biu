@@ -25,7 +25,7 @@ func (i *GoFile) GetPackageName(formats ...func(string) string) *ast.Ident {
 	}
 }
 
-func (i *GoFile) ToAstFile() *ast.File {
+func (i *GoFile) ToPoFile() *ast.File {
 	wf := &ast.File{
 		Decls: []ast.Decl{},
 	}
@@ -33,7 +33,21 @@ func (i *GoFile) ToAstFile() *ast.File {
 	for _, st := range i.Structs {
 		wf.Decls = append(wf.Decls, &ast.GenDecl{
 			Tok:   token.TYPE,
-			Specs: []ast.Spec{st.ToAstStruct()},
+			Specs: []ast.Spec{st.ToPoStruct()},
+		})
+	}
+	return wf
+}
+
+func (i *GoFile) ToDtoFile() *ast.File {
+	wf := &ast.File{
+		Decls: []ast.Decl{},
+	}
+	wf.Name = i.GetPackageName()
+	for _, st := range i.Structs {
+		wf.Decls = append(wf.Decls, &ast.GenDecl{
+			Tok:   token.TYPE,
+			Specs: []ast.Spec{st.ToDtoStruct()},
 		})
 	}
 	return wf

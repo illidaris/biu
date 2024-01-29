@@ -3,6 +3,7 @@ module biu
 go 1.20
 
 require (
+	github.com/illidaris/file v0.0.0-20211214105415-1252d850b318
 	github.com/spf13/cobra v1.4.0
 	github.com/xuri/excelize/v2 v2.8.0
 )
