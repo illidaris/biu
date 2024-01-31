@@ -31,10 +31,15 @@ func (i *GoFile) ToPoFile() *ast.File {
 	}
 	wf.Name = i.GetPackageName()
 	for _, st := range i.Structs {
-		wf.Decls = append(wf.Decls, &ast.GenDecl{
-			Tok:   token.TYPE,
-			Specs: []ast.Spec{st.ToPoStruct()},
-		})
+		astSt := st.ToPoStruct()
+		wf.Decls = append(wf.Decls,
+			// 结构体
+			&ast.GenDecl{
+				Tok:   token.TYPE,
+				Specs: []ast.Spec{astSt},
+			},
+			TableNameFunc(st.Name),
+		)
 	}
 	return wf
 }
@@ -51,4 +56,33 @@ func (i *GoFile) ToDtoFile() *ast.File {
 		})
 	}
 	return wf
+}
+
+func (i *GoFile) ToMDFile() [][]string {
+	rows := [][]string{}
+	for _, st := range i.Structs {
+		rows = append(rows,
+			[]string{},
+			[]string{
+				st.Name,
+				"类型",
+				"描述",
+				"备注",
+			},
+			[]string{
+				"---",
+				"---",
+				"---",
+				"---",
+			})
+		for _, field := range st.Fields {
+			rows = append(rows, []string{
+				field.Name,
+				field.Type,
+				field.Comment,
+				field.Describe,
+			})
+		}
+	}
+	return rows
 }

@@ -28,7 +28,7 @@ to quickly create a Cobra application.`,
 			return
 		}
 		fmt.Printf("[%s] will generate property \n", absPath)
-		excel2model.Invoke("tmp/article.xlsx")
+		excel2model.Invoke(filePath)
 	},
 }
 

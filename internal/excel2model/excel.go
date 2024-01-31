@@ -42,6 +42,8 @@ func Invoke(filepath string) {
 		Write2File("tmp", "po", v.PackageName, v.Name, po)
 		dto := v.ToDtoFile()
 		Write2File("tmp", "dto", v.PackageName, v.Name, dto)
+		md := v.ToMDFile()
+		Write2MD("tmp", "doc", v.PackageName, v.Name, md)
 	}
 }
 
@@ -104,6 +106,27 @@ func Write2File(out string, module, pkg, name string, gofile *ast.File) {
 		log.Fatal(err)
 	}
 	keys = append(keys, fmt.Sprintf("%s.go", name))
+	// 输出Go代码
+	os.WriteFile(path.Join(keys...), buffer.Bytes(), os.ModePerm)
+}
+
+func Write2MD(out string, module, pkg, name string, rows [][]string) {
+	var output []byte
+	var keys = []string{
+		out,
+		module,
+		pkg,
+	}
+	_ = fileex.MkdirIfNotExist(path.Join(keys...))
+	buffer := bytes.NewBuffer(output)
+	for _, row := range rows {
+		if len(row) == 0 {
+			buffer.WriteString("\n")
+		} else {
+			buffer.WriteString(fmt.Sprintf("|%s|\n", strings.Join(row, "|")))
+		}
+	}
+	keys = append(keys, fmt.Sprintf("%s.md", name))
 	// 输出Go代码
 	os.WriteFile(path.Join(keys...), buffer.Bytes(), os.ModePerm)
 }

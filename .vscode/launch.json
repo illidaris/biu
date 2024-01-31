@@ -26,7 +26,7 @@
       "request": "launch",
       "mode": "auto",
       "program": "${fileDirname}",
-      "args": ["excel2model", "-f", "tmp"]
+      "args": ["excel2model", "-f", "tmp/article.xlsx"]
     },
     {
       "name": "excel2model_tmpl dev",
